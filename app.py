@@ -15,8 +15,9 @@ st.sidebar.header("Phase 2: Data Acquisition")
 uploaded_file = st.sidebar.file_uploader("Upload HR-Attrition.csv", type="csv")
 
 if uploaded_file is not None:
-....df = pd.read_csv(uploaded_file, encoding='latin1')
-....tab1, tab2, tab3, tab4, tab5 = st.tabs(["1. Business Understanding", "3. Data Preparation", "4. Exploratory Analysis", "5. Modeling", "6. Prediction Tool"])
+    df = pd.read_csv(uploaded_file, encoding='latin1')
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["1. Business Understanding", "3. Data Preparation", "4. Exploratory Analysis", "5. Modeling", "6. Prediction Tool"])
+    
     with tab1:
         st.header("Phase 1: Business Understanding")
         st.info("Objective: Identify predictors that correlate with employee attrition to improve retention.")
