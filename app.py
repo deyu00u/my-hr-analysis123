@@ -73,21 +73,19 @@ if uploaded_file is not None:
         
         with tab2:
             st.header("Phase 3: Data Preparation")
-            st.markdown("#### The Cleanup Process:")
-            st.markdown("1. Removed encoding artifacts like `ï»¿Age`.")
-            st.markdown("2. Standardized column names.")
-            st.markdown("3. Dropped redundant features (`EmployeeCount`, `StandardHours`, `Over18`, `EmployeeNumber`) using `errors='ignore'`.")
-            st.markdown("4. Data is split 80% for training and 20% for testing.")
-            
-            # Action: Clean the data for modelling
-            # Explicitly make sure Age is Age
-            if 'Age' not in df.columns and 'i??Age' in df.columns: #Fallback in case basic clean failed
+            st.markdown("#### The Data Science Cleanup Process:")
+            st.markdown("1. **Data Cleaning:** Handled character encoding and standardized all column headers.")
+            st.markdown("2. **Feature Engineering:** Identified and removed redundant variables that do not contribute to the model's predictive power.")
+            st.markdown("3. **Redundancy Filter:** Dropped constant features like `StandardHours` and `Over18` to reduce noise.")
+            st.markdown("4. **Data Partitioning:** Split the dataset into 80% Training and 20% Testing sets for model validation.")
+           
+            if 'Age' not in df.columns and 'i??Age' in df.columns: #
                 df.rename(columns={'i??Age':'Age'}, inplace=True)
                 
             df_clean = df.drop(columns=['EmployeeCount', 'StandardHours', 'Over18', 'EmployeeNumber'], errors='ignore')
             st.markdown("---")
             st.write("#### First 10 rows of your cleaned data:")
-            # Limit height for better display
+           
             st.dataframe(df_clean.head(10), height=300)
             st.success(f"Successfully Loaded and Cleaned: {len(df_clean)} rows.")
         
@@ -95,11 +93,11 @@ if uploaded_file is not None:
             st.header("Phase 4: Exploratory Data Analysis")
             st.write("How variables correlate directly with Attrition.")
             
-            # --- 5. EDA PROCESSING ---
+          
             df_corr = df_clean.copy()
-            # Standardize Target
+            
             df_corr['Attrition'] = df_corr['Attrition'].apply(lambda x: 1 if str(x).strip().lower() == 'yes' else 0)
-            # Standardize Overtime as it is usually highly important
+           
             if 'OverTime' in df_corr.columns:
                 df_corr['OverTime'] = df_corr['OverTime'].apply(lambda x: 1 if str(x).strip().lower() == 'yes' else 0)
             
