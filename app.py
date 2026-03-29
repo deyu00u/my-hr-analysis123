@@ -44,14 +44,10 @@ if uploaded_file is not None:
     with tab1:
         st.header("Phase 1: Business Understanding")
         st.subheader("Project Objectives")
-        st.write("""
-        Employee attrition causes significant operational costs. This project aims to:
-        """)
-        st.info("""
-        1. **Identify Drivers:** Isolate variables like Overtime or Pay that lead to turnover.
-        2. **Risk Prediction:** Develop a model to flag high-risk employee profiles.
-        3. **Retention Strategy:** Provide data-driven insights for management intervention.
-        """)
+        st.write("Employee attrition causes significant operational costs. This project aims to:")
+        st.write("1. **Identify Drivers:** Isolate variables like Overtime or Pay that lead to turnover.")
+        st.write("2. **Risk Prediction:** Develop a model to flag high-risk employee profiles.")
+        st.write("3. **Retention Strategy:** Provide data-driven insights for management intervention.")
 
     with tab2:
         st.header("Phase 3: Data Preparation")
@@ -59,7 +55,7 @@ if uploaded_file is not None:
         with col1:
             st.write("**Data Cleaning:** Dropping non-predictive variables.")
             df_clean = df.drop(columns=['EmployeeCount', 'StandardHours', 'Over18', 'EmployeeNumber'], errors='ignore')
-            st.success("Redundant features removed.")
+            st.write("Note: Redundant features (EmployeeCount, StandardHours, etc.) have been removed.")
         
         with col2:
             st.write("**Dataset Preview:**")
@@ -70,7 +66,6 @@ if uploaded_file is not None:
         st.write("Correlation analysis of all numeric features against Attrition.")
         
         df_corr = df_clean.copy()
-        # Convert target to binary for correlation
         if 'Attrition' in df_corr.columns:
             df_corr['Attrition'] = df_corr['Attrition'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
         
@@ -131,10 +126,11 @@ if uploaded_file is not None:
         if job_sat < 2: risk_score += 20
         if distance > 20: risk_score += 10
         
+        st.subheader("Result:")
         if risk_score >= 50:
-            st.error(f"Prediction: High Risk of Attrition ({risk_score}%)")
+            st.write(f"**High Risk of Attrition ({risk_score}%)**")
         else:
-            st.success(f"Prediction: Low Risk of Attrition ({risk_score}%)")
+            st.write(f"**Low Risk of Attrition ({risk_score}%)**")
 
 else:
-    st.info("Please upload the HR-Attrition.csv file in the sidebar to begin the analysis.")
+    st.write("Please upload the HR-Attrition.csv file in the sidebar to begin the analysis.")
