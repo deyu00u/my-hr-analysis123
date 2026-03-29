@@ -11,9 +11,16 @@ import re
 st.set_page_config(page_title="HR Attrition Project", layout="wide")
 
 def clean_data(df):
+    # Fix headers: Remove non-ASCII characters and hidden symbols
     df.columns = [re.sub(r'[^\x00-\x7F]+', '', str(col)).strip() for col in df.columns]
-    for col in df.select_dtypes(include=['object']):
-        df[col] = df[col].apply(lambda x: re.sub(r'[^\x00-\x7F]+', '', str(x)).strip() if pd.notnull(x) else x)
+    
+    # Fix cell values: Specifically target the 'ï»¿' and other artifacts in text
+    for col in df.columns:
+        if df[col].dtype == 'object':
+            df[col] = df[col].astype(str).str.replace('ï»¿', '', regex=False).str.strip()
+            # Remove any remaining non-printable characters
+            df[col] = df[col].apply(lambda x: re.sub(r'[^\x20-\x7E]+', '', x))
+            
     return df
 
 st.title("HR Attrition Analysis: Data Science Lifecycle")
@@ -23,6 +30,7 @@ file_name = "HR-Attrition.csv"
 
 if os.path.exists(file_name):
     try:
+        # Using python engine to prevent buffer errors
         df_raw = pd.read_csv(file_name, engine='python', encoding='latin1', on_bad_lines='skip')
         df = clean_data(df_raw)
         
