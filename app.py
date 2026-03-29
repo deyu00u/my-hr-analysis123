@@ -6,13 +6,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 import os
+import re
 
 st.set_page_config(page_title="HR Attrition Project", layout="wide")
 
 def clean_data(df):
-    df.columns = df.columns.astype(str).str.strip().str.replace('ï»¿', '')
+    # Brute force: Remove any character that isn't a letter, number, or standard punctuation
+    df.columns = [re.sub(r'[^\x00-\x7F]+', '', str(col)).strip() for col in df.columns]
+    # Do the same for text inside the cells
     for col in df.select_dtypes(include=['object']):
-        df[col] = df[col].astype(str).str.replace('ï»¿', '')
+        df[col] = df[col].apply(lambda x: re.sub(r'[^\x00-\x7F]+', '', str(x)).strip() if pd.notnull(x) else x)
     return df
 
 st.title("HR Attrition: Data Science Lifecycle")
@@ -22,7 +25,8 @@ file_name = "HR-Attrition.csv"
 
 if os.path.exists(file_name):
     try:
-        df_raw = pd.read_csv(file_name, sep=',', engine='python', encoding='latin1', on_bad_lines='skip')
+        # Using the most compatible settings
+        df_raw = pd.read_csv(file_name, sep=',', engine='python', encoding='utf-8-sig', on_bad_lines='skip')
         df = clean_data(df_raw)
         
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
