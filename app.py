@@ -1,5 +1,5 @@
 import streamlit as st
-import pd as pd
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -70,15 +70,18 @@ if uploaded_file is not None:
         st.write("Correlation analysis of all numeric features against Attrition.")
         
         df_corr = df_clean.copy()
-        df_corr['Attrition'] = df_corr['Attrition'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
+        # Convert target to binary for correlation
+        if 'Attrition' in df_corr.columns:
+            df_corr['Attrition'] = df_corr['Attrition'].apply(lambda x: 1 if str(x).lower() == 'yes' else 0)
         
         numeric_cols = df_corr.select_dtypes(include=['number'])
-        corr = numeric_cols.corr()['Attrition'].sort_values()
-        
-        fig, ax = plt.subplots(figsize=(10, 8))
-        corr.drop('Attrition').plot(kind='barh', ax=ax, color='steelblue')
-        ax.set_title("Feature Correlation with Attrition")
-        st.pyplot(fig)
+        if not numeric_cols.empty and 'Attrition' in numeric_cols.columns:
+            corr = numeric_cols.corr()['Attrition'].sort_values()
+            
+            fig, ax = plt.subplots(figsize=(10, 8))
+            corr.drop('Attrition', errors='ignore').plot(kind='barh', ax=ax, color='steelblue')
+            ax.set_title("Feature Correlation with Attrition")
+            st.pyplot(fig)
 
     with tab4:
         st.header("Phase 5: Modeling & Evaluation")
@@ -88,22 +91,23 @@ if uploaded_file is not None:
         for col in df_ml.select_dtypes(include=['object']).columns:
             df_ml[col] = le.fit_transform(df_ml[col].astype(str))
         
-        X = df_ml.drop('Attrition', axis=1)
-        y = df_ml['Attrition']
-        
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        rf = RandomForestClassifier(n_estimators=100, random_state=42)
-        rf.fit(X_train, y_train)
-        
-        accuracy = rf.score(X_test, y_test)
-        st.metric("Model Prediction Accuracy", f"{accuracy*100:.2f}%")
-        
-        st.subheader("Key Drivers Identified by Model")
-        importances = pd.Series(rf.feature_importances_, index=X.columns).nlargest(10).sort_values()
-        fig_imp, ax_imp = plt.subplots()
-        importances.plot(kind='barh', color='seagreen', ax=ax_imp)
-        st.pyplot(fig_imp)
+        if 'Attrition' in df_ml.columns:
+            X = df_ml.drop('Attrition', axis=1)
+            y = df_ml['Attrition']
+            
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            
+            rf = RandomForestClassifier(n_estimators=100, random_state=42)
+            rf.fit(X_train, y_train)
+            
+            accuracy = rf.score(X_test, y_test)
+            st.metric("Model Prediction Accuracy", f"{accuracy*100:.2f}%")
+            
+            st.subheader("Key Drivers Identified by Model")
+            importances = pd.Series(rf.feature_importances_, index=X.columns).nlargest(10).sort_values()
+            fig_imp, ax_imp = plt.subplots()
+            importances.plot(kind='barh', color='seagreen', ax=ax_imp)
+            st.pyplot(fig_imp)
 
     with tab5:
         st.header("Phase 6: Deployment (Prediction Tool)")
