@@ -55,8 +55,7 @@ if uploaded_file is not None:
         with col1:
             st.write("**Data Cleaning:** Dropping non-predictive variables.")
             df_clean = df.drop(columns=['EmployeeCount', 'StandardHours', 'Over18', 'EmployeeNumber'], errors='ignore')
-            st.write("Note: Redundant features (EmployeeCount, StandardHours, etc.) have been removed.")
-        
+            
         with col2:
             st.write("**Dataset Preview:**")
             st.dataframe(df_clean.head(10))
