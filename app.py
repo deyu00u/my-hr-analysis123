@@ -63,6 +63,7 @@ if uploaded_file is not None:
     with tab3:
         st.header("Phase 4: Exploratory Data Analysis")
         st.write("Correlation analysis of all numeric features against Attrition.")
+        st.write(f"Dataset now has {df_clean.shape[0]} rows and {df_clean.shape[1]} columns after cleaning.")
         
         df_corr = df_clean.copy()
         if 'Attrition' in df_corr.columns:
