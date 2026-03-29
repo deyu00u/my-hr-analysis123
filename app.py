@@ -7,10 +7,10 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 import re
 
-# Set page to wide mode
+
 st.set_page_config(page_title="HR Attrition Analysis Pro", layout="wide")
 
-# Cleans text strings from hidden artifacts like the ï»¿ symbol
+
 def clean_text(text):
     if isinstance(text, str):
         return re.sub(r'[^\x00-\x7F]+', '', text).strip()
@@ -19,20 +19,20 @@ def clean_text(text):
 st.title("HR Attrition: Data Science Lifecycle")
 st.markdown("---")
 
-# --- PHASE 2: DATA ACQUISITION ---
+
 st.sidebar.header("Phase 2: Data Acquisition")
 uploaded_file = st.sidebar.file_uploader("Upload HR-Attrition.csv", type="csv")
 
 if uploaded_file is not None:
-    # 'utf-8-sig' ignores hidden BOM characters (gibberish fix)
+    
     df = pd.read_csv(uploaded_file, encoding='utf-8-sig')
     
-    # Standardize headers and cell values
+    
     df.columns = [clean_text(col) for col in df.columns]
     for col in df.select_dtypes(include=['object']):
         df[col] = df[col].apply(clean_text)
 
-    # UI: Tabs for the Lifecycle Phases
+
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "Phase 1: Business", 
         "Phase 3: Preparation", 
