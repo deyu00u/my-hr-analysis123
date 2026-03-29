@@ -22,7 +22,7 @@ file_name = "HR-Attrition.csv"
 
 if os.path.exists(file_name):
     try:
-        df_raw = pd.read_csv(file_name, sep=',', encoding='latin1', on_bad_lines='skip')
+        df_raw = pd.read_csv(file_name, sep=',', engine='python', encoding='latin1', on_bad_lines='skip')
         df = clean_data(df_raw)
         
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
