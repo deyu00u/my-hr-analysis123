@@ -11,22 +11,19 @@ import re
 st.set_page_config(page_title="HR Attrition Project", layout="wide")
 
 def clean_data(df):
-    # Brute force: Remove any character that isn't a letter, number, or standard punctuation
     df.columns = [re.sub(r'[^\x00-\x7F]+', '', str(col)).strip() for col in df.columns]
-    # Do the same for text inside the cells
     for col in df.select_dtypes(include=['object']):
         df[col] = df[col].apply(lambda x: re.sub(r'[^\x00-\x7F]+', '', str(x)).strip() if pd.notnull(x) else x)
     return df
 
-st.title("HR Attrition: Data Science Lifecycle")
+st.title("HR Attrition Analysis: Data Science Lifecycle")
 st.markdown("---")
 
 file_name = "HR-Attrition.csv"
 
 if os.path.exists(file_name):
     try:
-        # Using the most compatible settings
-        df_raw = pd.read_csv(file_name, sep=',', engine='python', encoding='utf-8-sig', on_bad_lines='skip')
+        df_raw = pd.read_csv(file_name, sep=',', encoding='latin1', on_bad_lines='skip')
         df = clean_data(df_raw)
         
         tab1, tab2, tab3, tab4, tab5 = st.tabs([
@@ -44,19 +41,19 @@ if os.path.exists(file_name):
         with tab2:
             st.header("Phase 3: Data Preparation")
             st.subheader("Processing Steps")
-            st.write("1. Encoding: Standardized character formatting to ensure data integrity.")
-            st.write("2. Feature Filtering: Removed constant or non-predictive variables like EmployeeNumber and StandardHours.")
-            st.write("3. Categorical Conversion: Used Label Encoding to prepare text data for the Random Forest algorithm.")
+            st.write("1. Data Cleaning: Handled character encoding and standardized all column headers for consistency.")
+            st.write("2. Feature Engineering: Removed constant variables that do not contribute to model variance.")
+            st.write("3. Categorical Encoding: Converted textual data into numerical format for algorithmic processing.")
             
             df_clean = df.drop(columns=['EmployeeCount', 'StandardHours', 'Over18', 'EmployeeNumber'], errors='ignore')
             st.markdown("---")
-            st.write("Dataset Preview:")
+            st.write("Cleaned Dataset Sample:")
             st.dataframe(df_clean.head(10))
-            st.info(f"Total Rows Processed: {len(df_clean)}")
+            st.info(f"Total Observations: {len(df_clean)}")
         
         with tab3:
             st.header("Phase 4: Exploratory Data Analysis")
-            st.write("Analysis of the relationship between numerical attributes and Attrition status.")
+            st.write("Correlation analysis showing the relationship between employee features and Attrition.")
             
             df_corr = df_clean.copy()
             if 'Attrition' in df_corr.columns:
@@ -68,11 +65,11 @@ if os.path.exists(file_name):
                     
                     fig, ax = plt.subplots(figsize=(10, 8))
                     corr_series.plot(kind='barh', ax=ax, color='steelblue')
-                    ax.set_title("Feature Correlation with Attrition")
+                    ax.set_title("Feature Correlation with Attrition Status")
                     plt.tight_layout()
                     st.pyplot(fig)
             else:
-                st.error("Attrition column not found in data.")
+                st.error("Target variable 'Attrition' not found.")
 
         with tab4:
             st.header("Phase 5: Modeling and Evaluation")
@@ -93,21 +90,20 @@ if os.path.exists(file_name):
                 model.fit(X_train, y_train)
                 accuracy = model.score(X_test, y_test)
                 
-                st.metric("Model Prediction Accuracy", f"{accuracy*100:.2f}%")
+                st.metric("Model Performance (Accuracy)", f"{accuracy*100:.2f}%")
                 
-                st.subheader("Key Predictive Factors")
-                st.write("The model identified the following features as most impactful:")
+                st.subheader("Predictive Feature Importance")
                 importances = pd.Series(model.feature_importances_, index=X.columns).nlargest(10).sort_values()
                 fig_imp, ax_imp = plt.subplots(figsize=(10, 6))
                 importances.plot(kind='barh', color='seagreen', ax=ax_imp)
                 plt.tight_layout()
                 st.pyplot(fig_imp)
             except Exception as e:
-                st.error(f"Modeling error: {e}")
+                st.error(f"Error during model execution: {e}")
 
         with tab5:
             st.header("Phase 6: Prediction Tool")
-            st.write("Input employee details to evaluate potential attrition risk.")
+            st.write("Simulate employee profiles to evaluate the calculated attrition risk.")
             
             col1, col2 = st.columns(2)
             with col1:
@@ -117,19 +113,19 @@ if os.path.exists(file_name):
                 input_income = st.number_input("Monthly Income", value=5000)
                 input_sat = st.slider("Job Satisfaction Rating (1-4)", 1, 4, 3)
             
-            risk_score = 0
-            if input_overtime == "Yes": risk_score += 40
-            if input_income < 3500: risk_score += 30
-            if input_age < 25: risk_score += 15
-            if input_sat < 2: risk_score += 15
+            score = 0
+            if input_overtime == "Yes": score += 40
+            if input_income < 3500: score += 30
+            if input_age < 25: score += 15
+            if input_sat < 2: score += 15
             
             st.markdown("---")
-            if risk_score >= 50:
-                st.error(f"Assessment: High Attrition Risk ({risk_score}%)")
+            if score >= 50:
+                st.error(f"Calculated Risk: High Attrition Risk ({score}%)")
             else:
-                st.success(f"Assessment: Low Attrition Risk ({risk_score}%)")
+                st.success(f"Calculated Risk: Low Attrition Risk ({score}%)")
 
     except Exception as e:
-        st.error(f"Error reading dataset: {e}")
+        st.error(f"Dataset access error: {e}")
 else:
-    st.warning("Data file not found. Please verify that 'HR-Attrition.csv' is present in the repository.")
+    st.warning("The source file 'HR-Attrition.csv' was not found in the directory.")
